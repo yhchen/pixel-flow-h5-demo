@@ -42,7 +42,8 @@ let gameState = {
     blocksLeft: 0,
     isProcessingTick: false, 
     tickInterval: null,
-    audioCtx: null // Web Audio Context
+    audioCtx: null, // Web Audio Context
+    musicPlayed: false // 标记是否播放过开场曲
 };
 
 // DOM 元素 references
@@ -467,7 +468,7 @@ function playShootSound() {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
-    osc.type = 'square'; // 方波更有红白机复古感
+    osc.type = 'square'; 
     osc.frequency.setValueAtTime(440, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(10, ctx.currentTime + 0.1);
 
@@ -481,14 +482,58 @@ function playShootSound() {
     osc.stop(ctx.currentTime + 0.1);
 }
 
+// --- 背景音乐: 坦克大战开场旋律 ---
+function playStartMusic() {
+    initAudio();
+    const ctx = gameState.audioCtx;
+    if (!ctx) return;
+
+    // 经典开场曲旋律数据 (音高, 持续时间)
+    const melody = [
+        [392, 0.15], [523, 0.15], [392, 0.15], [261, 0.15], 
+        [392, 0.15], [523, 0.15], [392, 0.15], [261, 0.15],
+        [440, 0.15], [587, 0.15], [440, 0.15], [293, 0.15],
+        [440, 0.15], [587, 0.15], [440, 0.15], [293, 0.15],
+        [493, 0.15], [659, 0.15], [493, 0.15], [329, 0.15],
+        [523, 0.3],  [392, 0.15], [261, 0.15], [523, 0.6]
+    ];
+
+    let startTime = ctx.currentTime + 0.1;
+
+    melody.forEach(([freq, duration]) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, startTime);
+
+        gain.gain.setValueAtTime(0.05, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration - 0.05);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+
+        startTime += duration;
+    });
+}
+
 // 绑定重启按钮，顺便激活 AudioContext (浏览器安全策略要求)
 document.getElementById('restart-btn').addEventListener('click', () => {
     initAudio();
     initGame(LEVEL_1);
 });
 
-// 在页面任何地方首次点击也激活一次 AudioContext
-document.addEventListener('mousedown', () => initAudio(), { once: true });
+// 在页面任何地方首次点击也激活一次 AudioContext 并播放启动音乐
+document.addEventListener('mousedown', () => {
+    initAudio();
+    if (gameState.audioCtx && !gameState.musicPlayed) {
+        gameState.musicPlayed = true;
+        playStartMusic();
+    }
+}, { once: true });
 
 // 启动
 initGame(LEVEL_1);
