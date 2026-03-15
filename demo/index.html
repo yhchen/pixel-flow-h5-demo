@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Flow Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- 头部信息 -->
+        <div id="header">
+            <div id="level-info">Level 1</div>
+            <div id="score-info">Blocks Left: <span id="blocks-left">0</span></div>
+        </div>
+
+        <!-- 游戏主要区域：像素板 -->
+        <div id="board-container">
+            <div id="pixel-board"></div>
+        </div>
+
+    <!-- 删除了原有的 queue-container -->
+        
+        <!-- 卡牌区 (玩家可以点击进入队列) -->
+        <div id="deck-container">
+        </div>
+    </div>
+    
+    <!-- 游戏结束面板 -->
+    <div id="game-over-panel" class="hidden">
+        <h2 id="game-result-title">Victory!</h2>
+        <button id="restart-btn">Next Level / Restart</button>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

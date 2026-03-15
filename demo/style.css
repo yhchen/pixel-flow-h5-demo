@@ -1,0 +1,268 @@
+:root {
+    --bg-color: #2c3e50;
+    --board-bg: #34495e;
+    --slot-bg: #465c71;
+    --text-color: #ecf0f1;
+    --accent-color: #e74c3c;
+    --border-radius: 8px;
+    --cell-size: 30px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+}
+
+#game-container {
+    width: 100%;
+    max-width: 400px;
+    height: 100%;
+    max-height: 800px;
+    background-color: #1a252f;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+#header {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background-color: rgba(0,0,0,0.2);
+}
+
+#board-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+#pixel-board {
+    display: grid;
+    gap: 2px;
+    background-color: var(--board-bg);
+    padding: 10px;
+    border-radius: var(--border-radius);
+    /* 具体的行列数由 JS 动态设置 */
+}
+
+.pixel {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    border-radius: 4px;
+    transition: transform 0.1s;
+    position: relative;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
+}
+
+.pixel.destroyed {
+    visibility: hidden;
+    transform: scale(0);
+    opacity: 0;
+}
+
+/* 传送带格子 */
+.track-cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    background: repeating-linear-gradient(
+        45deg,
+        rgba(0, 0, 0, 0.1),
+        rgba(0, 0, 0, 0.1) 5px,
+        rgba(0, 0, 0, 0.2) 5px,
+        rgba(0, 0, 0, 0.2) 10px
+    );
+    border: 1px dashed rgba(255,255,255,0.1);
+    position: relative;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 占据在格子或跑道上的坦克 (取代原先的 shooter) */
+.shooter {
+    width: 80%;
+    height: 80%;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    transition: transform 0.3s linear; 
+    
+    /* 坦克主体样式 (类似FC坦克大战的方块像素风) */
+    background-color: var(--tank-color, inherit);
+    border-radius: 2px;
+    box-shadow: 
+        inset 4px 0 0 rgba(0,0,0,0.3), /* 左侧履带 */
+        inset -4px 0 0 rgba(0,0,0,0.3), /* 右侧履带 */
+        0 2px 4px rgba(0,0,0,0.4);
+}
+
+/* 坦克的炮管 */
+.shooter::before {
+    content: '';
+    position: absolute;
+    top: -30%; /* 炮管伸出主体上方 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 25%;
+    height: 60%;
+    background-color: inherit;
+    border: 1px solid rgba(0,0,0,0.3);
+    border-radius: 2px;
+    z-index: -1;
+}
+
+/* 坦克炮管旋转控制类 */
+/* 这里的角度是以炮管默认向上(0deg)为基准 */
+.tank-up { transform: rotate(0deg); }
+.tank-right { transform: rotate(90deg); }
+.tank-down { transform: rotate(180deg); }
+.tank-left { transform: rotate(-90deg); }
+
+/* 弹药提示 (需要忽略坦克的旋转，保持正向，因此把它抽拉出来或者在JS里反相旋转，但由于用DOM嵌套这里做个反向处理或放在独立层) */
+.ammo-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    z-index: 15;
+}
+
+/* 可供点击的队列/卡组 */
+#deck-container {
+    min-height: 100px;
+    display: flex;
+    overflow-x: auto;
+    align-items: center;
+    padding: 15px;
+    gap: 15px;
+    background-color: rgba(0,0,0,0.5);
+    /* 隐藏滚动条 */
+    scrollbar-width: none;
+}
+#deck-container::-webkit-scrollbar {
+    display: none;
+}
+
+.deck-card {
+    min-width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.3s;
+    
+    /* 坦克主体样式 */
+    background-color: var(--tank-color, inherit);
+    border-radius: 2px;
+    box-shadow: 
+        inset 4px 0 0 rgba(0,0,0,0.3), 
+        inset -4px 0 0 rgba(0,0,0,0.3), 
+        0 4px 6px rgba(0,0,0,0.3);
+}
+
+.deck-card::before {
+    content: '';
+    position: absolute;
+    top: -25%; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 25%;
+    height: 60%;
+    background-color: var(--tank-color, transparent);
+    border: 1px solid rgba(0,0,0,0.3);
+    border-radius: 2px;
+    z-index: -1;
+}
+
+.deck-card.used {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.5);
+}
+
+.deck-card:hover {
+    transform: translateY(-5px);
+}
+
+/* 子弹动画 */
+.bullet {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    z-index: 20;
+    transition: left 0.1s linear, top 0.1s linear;
+    box-shadow: 0 0 10px rgba(255,255,255,0.8);
+}
+
+/* 游戏结束面板 */
+#game-over-panel {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+#game-over-panel.hidden {
+    display: none;
+}
+
+#game-result-title {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #f1c40f;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+#restart-btn {
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+#restart-btn:hover {
+    background-color: #2980b9;
+}
