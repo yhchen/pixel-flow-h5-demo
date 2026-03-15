@@ -41,7 +41,8 @@ let gameState = {
     trackPath: [], // 预计算的外围环形跑道坐标系列 [{r, c}, {r, c}...]
     blocksLeft: 0,
     isProcessingTick: false, 
-    tickInterval: null
+    tickInterval: null,
+    audioCtx: null // Web Audio Context
 };
 
 // DOM 元素 references
@@ -125,8 +126,8 @@ function initGame(level) {
     
     document.getElementById('game-over-panel').classList.add('hidden');
     
-    // 启动跑道游戏循环 (每250ms Tick一次，速度翻倍)
-    gameState.tickInterval = setInterval(gameTick, 250);
+    // 启动跑道游戏循环 (每125ms Tick一次，再次提速2倍)
+    gameState.tickInterval = setInterval(gameTick, 125);
 }
 
 // 构建顺时针环形轨道坐标数列
@@ -369,6 +370,9 @@ function raycastFindTarget(shooter) {
 
 // 射击动画
 function fireBullet(shooter, targetBlock) {
+    // 播放音效
+    playShootSound();
+
     return new Promise(resolve => {
         // shooter 起点在它所处的 track-cell
         const cellNode = shooter.el.parentNode;
@@ -447,10 +451,44 @@ function showGameOver(isWin) {
     panel.classList.remove('hidden');
 }
 
-// 绑定按钮
+// --- 音效处理 (Web Audio API) ---
+
+function initAudio() {
+    if (!gameState.audioCtx) {
+        gameState.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+}
+
+function playShootSound() {
+    initAudio();
+    if (!gameState.audioCtx) return;
+
+    const ctx = gameState.audioCtx;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'square'; // 方波更有红白机复古感
+    osc.frequency.setValueAtTime(440, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(10, ctx.currentTime + 0.1);
+
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.1);
+}
+
+// 绑定重启按钮，顺便激活 AudioContext (浏览器安全策略要求)
 document.getElementById('restart-btn').addEventListener('click', () => {
+    initAudio();
     initGame(LEVEL_1);
 });
+
+// 在页面任何地方首次点击也激活一次 AudioContext
+document.addEventListener('mousedown', () => initAudio(), { once: true });
 
 // 启动
 initGame(LEVEL_1);

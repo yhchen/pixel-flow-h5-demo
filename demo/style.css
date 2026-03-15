@@ -107,7 +107,7 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 10;
-    transition: transform 0.3s linear; 
+    transition: transform 0.1s linear; 
     
     /* 坦克主体样式 (类似FC坦克大战的方块像素风) */
     background-color: var(--tank-color, inherit);
