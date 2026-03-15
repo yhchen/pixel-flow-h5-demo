@@ -447,8 +447,14 @@ function showGameOver(isWin) {
     const panel = document.getElementById('game-over-panel');
     const title = document.getElementById('game-result-title');
     
-    title.textContent = isWin ? 'Victory!' : 'Track Blocked / Out of Moves';
-    title.style.color = isWin ? '#f1c40f' : '#e74c3c';
+    if (isWin) {
+        title.textContent = 'Victory!';
+        title.style.color = '#f1c40f';
+        playWinSound(); // 触发胜利音效
+    } else {
+        title.textContent = 'Track Blocked / Out of Moves';
+        title.style.color = '#e74c3c';
+    }
     panel.classList.remove('hidden');
 }
 
@@ -517,6 +523,33 @@ function playStartMusic() {
         osc.stop(startTime + duration);
 
         startTime += duration;
+    });
+}
+
+// --- 胜利音效: 经典的 8-bit 上扬音 (C4, E4, G4, C5) ---
+function playWinSound() {
+    initAudio();
+    const ctx = gameState.audioCtx;
+    if (!ctx) return;
+
+    const notes = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
+    let startTime = ctx.currentTime;
+
+    notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, startTime + i * 0.1);
+
+        gain.gain.setValueAtTime(0.05, startTime + i * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + i * 0.1 + 0.15);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(startTime + i * 0.1);
+        osc.stop(startTime + i * 0.1 + 0.2);
     });
 }
 
