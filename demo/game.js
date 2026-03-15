@@ -526,14 +526,16 @@ document.getElementById('restart-btn').addEventListener('click', () => {
     initGame(LEVEL_1);
 });
 
-// 在页面任何地方首次点击也激活一次 AudioContext 并播放启动音乐
-document.addEventListener('mousedown', () => {
+// 绑定开始游戏按钮
+document.getElementById('start-btn').addEventListener('click', () => {
     initAudio();
     if (gameState.audioCtx && !gameState.musicPlayed) {
         gameState.musicPlayed = true;
         playStartMusic();
     }
-}, { once: true });
+    document.getElementById('start-screen').classList.add('hidden');
+    // 开始游戏
+    initGame(LEVEL_1);
+});
 
-// 启动
-initGame(LEVEL_1);
+// 移除了原来的全局 mousedown 监听和自动运行逻辑
