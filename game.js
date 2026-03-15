@@ -17,21 +17,128 @@ const COLORS = {
 };
 
 // 预设关卡数据
-const LEVEL_1 = {
-    map: [
-        ['R', 'R', 'R', '0', 'B', 'B', 'B'],
-        ['R', 'Y', 'R', '0', 'B', 'Y', 'B'],
-        ['R', 'R', 'R', '0', 'B', 'B', 'B'],
-        ['0', '0', '0', '0', '0', '0', '0'],
-        ['G', 'G', 'G', '0', 'P', 'P', 'P'],
-        ['G', 'Y', 'G', '0', 'P', 'Y', 'P'],
-        ['G', 'G', 'G', '0', 'P', 'P', 'P']
-    ],
-    // 玩家能够使用的可部署单元 [颜色, 弹药量]
-    deck: [
-        ['R', 8], ['B', 8], ['G', 8], ['P', 8], ['Y', 4]
-    ]
-};
+const LEVELS = [
+    { // Level 1 (R:16, B:16)
+        map: [
+            ['R', 'R', 'R', '0', 'B', 'B', 'B'],
+            ['R', '0', 'B', '0', 'R', '0', 'B'],
+            ['R', 'R', 'R', '0', 'B', 'B', 'B'],
+            ['0', '0', '0', '0', '0', '0', '0'],
+            ['B', 'B', 'B', '0', 'R', 'R', 'R'],
+            ['B', '0', 'R', '0', 'B', '0', 'R'],
+            ['B', 'B', 'B', '0', 'R', 'R', 'R']
+        ],
+        deck: [['R', 8], ['B', 8], ['R', 8], ['B', 8]]
+    },
+    { // Level 2 (G:16, Y:16, P:4)
+        map: [
+            ['G', 'G', 'G', '0', 'Y', 'Y', 'Y'],
+            ['G', 'P', 'G', '0', 'Y', 'P', 'Y'],
+            ['G', 'G', 'G', '0', 'Y', 'Y', 'Y'],
+            ['0', '0', '0', '0', '0', '0', '0'],
+            ['Y', 'Y', 'Y', '0', 'G', 'G', 'G'],
+            ['Y', 'P', 'Y', '0', 'G', 'P', 'G'],
+            ['Y', 'Y', 'Y', '0', 'G', 'G', 'G']
+        ],
+        deck: [['G', 8], ['Y', 8], ['G', 8], ['Y', 8], ['P', 4]]
+    },
+    { // Level 3 (R:6, B:6, G:6, P:6, Y:1)
+        map: [
+            ['R', '0', '0', 'B', '0', '0', 'G'],
+            ['0', 'R', '0', 'B', '0', 'G', '0'],
+            ['0', '0', 'R', 'B', 'G', '0', '0'],
+            ['P', 'P', 'P', 'Y', 'P', 'P', 'P'],
+            ['0', '0', 'G', 'B', 'R', '0', '0'],
+            ['0', 'G', '0', 'B', '0', 'R', '0'],
+            ['G', '0', '0', 'B', '0', '0', 'R']
+        ],
+        deck: [['R', 6], ['B', 6], ['G', 6], ['P', 6], ['Y', 1]]
+    },
+    { // Level 4 (R:10, B:10, G:5)
+        map: [
+            ['R', 'R', '0', 'R', 'R', '0', 'R'],
+            ['R', 'R', '0', 'R', 'R', '0', 'R'],
+            ['0', '0', '0', '0', '0', '0', '0'],
+            ['B', 'B', '0', 'B', 'B', '0', 'B'],
+            ['B', 'B', '0', 'B', 'B', '0', 'B'],
+            ['0', '0', '0', '0', '0', '0', '0'],
+            ['G', 'G', '0', 'G', 'G', '0', 'G']
+        ],
+        deck: [['R', 5], ['B', 5], ['R', 5], ['B', 5], ['G', 5]]
+    },
+    { // Level 5 (R:9, G:7, B:5, Y:4, P:3)
+        map: [
+            ['R', 'R', 'R', 'R', 'R', 'R', 'R'],
+            ['G', 'G', 'G', 'G', 'G', 'G', '0'],
+            ['B', 'B', 'B', 'B', 'B', '0', '0'],
+            ['Y', 'Y', 'Y', 'Y', '0', '0', '0'],
+            ['P', 'P', 'P', '0', '0', '0', '0'],
+            ['R', 'R', '0', '0', '0', '0', '0'],
+            ['G', '0', '0', '0', '0', '0', '0']
+        ],
+        deck: [['R', 9], ['G', 7], ['B', 5], ['Y', 4], ['P', 3]]
+    },
+    { // Level 6 (P:24, R:8, Y:1)
+        map: [
+            ['P', 'P', 'P', 'P', 'P', 'P', 'P'],
+            ['P', '0', '0', '0', '0', '0', 'P'],
+            ['P', '0', 'R', 'R', 'R', '0', 'P'],
+            ['P', '0', 'R', 'Y', 'R', '0', 'P'],
+            ['P', '0', 'R', 'R', 'R', '0', 'P'],
+            ['P', '0', '0', '0', '0', '0', 'P'],
+            ['P', 'P', 'P', 'P', 'P', 'P', 'P']
+        ],
+        deck: [['P', 12], ['P', 12], ['R', 8], ['Y', 1]]
+    },
+    { // Level 7 (R:5, B:5, G:6, Y:3, P:6)
+        map: [
+            ['R', '0', 'R', '0', 'B', '0', 'B'],
+            ['0', 'G', '0', 'Y', '0', 'P', '0'],
+            ['R', '0', 'R', '0', 'B', '0', 'B'],
+            ['0', 'Y', '0', 'G', '0', 'Y', '0'],
+            ['G', '0', 'G', '0', 'P', '0', 'P'],
+            ['0', 'P', '0', 'R', '0', 'B', '0'],
+            ['G', '0', 'G', '0', 'P', '0', 'P']
+        ],
+        deck: [['R', 5], ['B', 5], ['G', 6], ['Y', 3], ['P', 6]]
+    },
+    { // Level 8 (R:14, B:14, G:7, Y:7, P:7)
+        map: [
+            ['R', 'B', 'G', 'Y', 'P', 'R', 'B'],
+            ['R', 'B', 'G', 'Y', 'P', 'R', 'B'],
+            ['R', 'B', 'G', 'Y', 'P', 'R', 'B'],
+            ['R', 'B', 'G', 'Y', 'P', 'R', 'B'],
+            ['R', 'B', 'G', 'Y', 'P', 'R', 'B'],
+            ['R', 'B', 'G', 'Y', 'P', 'R', 'B'],
+            ['R', 'B', 'G', 'Y', 'P', 'R', 'B']
+        ],
+        deck: [['R', 7], ['B', 7], ['G', 7], ['Y', 7], ['P', 7], ['R', 7], ['B', 7]]
+    },
+    { // Level 9 (R:3, B:6, P:1, G:3)
+        map: [
+            ['0', '0', '0', 'R', '0', '0', '0'],
+            ['0', '0', '0', 'R', '0', '0', '0'],
+            ['0', '0', '0', 'R', '0', '0', '0'],
+            ['B', 'B', 'B', 'P', 'B', 'B', 'B'],
+            ['0', '0', '0', 'G', '0', '0', '0'],
+            ['0', '0', '0', 'G', '0', '0', '0'],
+            ['0', '0', '0', 'G', '0', '0', '0']
+        ],
+        deck: [['R', 3], ['B', 6], ['G', 3], ['P', 1]]
+    },
+    { // Level 10 (R:10, B:10, G:10, Y:10, P:9)
+        map: [
+            ['R', 'B', 'G', 'Y', 'P', 'R', 'B'],
+            ['G', 'Y', 'P', 'R', 'B', 'G', 'Y'],
+            ['P', 'R', 'B', 'G', 'Y', 'P', 'R'],
+            ['B', 'G', 'Y', 'P', 'R', 'B', 'G'],
+            ['Y', 'P', 'R', 'B', 'G', 'Y', 'P'],
+            ['R', 'B', 'G', 'Y', 'P', 'R', 'B'],
+            ['G', 'Y', 'P', 'R', 'B', 'G', 'Y']
+        ],
+        deck: [['R', 5], ['B', 5], ['G', 5], ['Y', 5], ['P', 5], ['R', 5], ['B', 5], ['G', 5], ['Y', 5], ['P', 4]]
+    }
+];
 
 // 游戏状态
 let gameState = {
@@ -43,7 +150,8 @@ let gameState = {
     isProcessingTick: false, 
     tickInterval: null,
     audioCtx: null, // Web Audio Context
-    musicPlayed: false // 标记是否播放过开场曲
+    musicPlayed: false, // 标记是否播放过开场曲
+    currentLevelIndex: 0 // 当前关卡索引
 };
 
 // DOM 元素 references
@@ -52,7 +160,14 @@ const deckEl = document.getElementById('deck-container');
 const blocksLeftEl = document.getElementById('blocks-left');
 
 // 初始化游戏
-function initGame(level) {
+function initGame() {
+    const level = LEVELS[gameState.currentLevelIndex];
+    if (!level) {
+        // 如果通关了所有关卡
+        showGameOver(true, true);
+        return;
+    }
+
     if (gameState.tickInterval) clearInterval(gameState.tickInterval);
     
     boardEl.innerHTML = '';
@@ -62,6 +177,9 @@ function initGame(level) {
     gameState.trackPath = [];
     gameState.blocksLeft = 0;
     gameState.isProcessingTick = false;
+
+    // 更新关卡显示
+    document.getElementById('level-info').textContent = `Level ${gameState.currentLevelIndex + 1} / ${LEVELS.length}`;
 
     // 解析地图，加上周围一圈轨道，所以宽高各+2
     const innerRows = level.map.length;
@@ -442,17 +560,26 @@ function checkDeadlock() {
     }
 }
 
-function showGameOver(isWin) {
+function showGameOver(isWin, isAllClear = false) {
     if (gameState.tickInterval) clearInterval(gameState.tickInterval);
     const panel = document.getElementById('game-over-panel');
     const title = document.getElementById('game-result-title');
+    const btn = document.getElementById('restart-btn');
     
     if (isWin) {
-        title.textContent = 'Victory!';
+        if (isAllClear) {
+            title.textContent = 'All Levels Clear! 🎉';
+            btn.textContent = 'Restart All';
+            gameState.currentLevelIndex = 0; // 重置
+        } else {
+            title.textContent = 'Victory!';
+            btn.textContent = 'Next Level';
+        }
         title.style.color = '#f1c40f';
         playWinSound(); // 触发胜利音效
     } else {
-        title.textContent = 'Track Blocked / Out of Moves';
+        title.textContent = 'Failed';
+        btn.textContent = 'Retry Level';
         title.style.color = '#e74c3c';
     }
     panel.classList.remove('hidden');
@@ -553,10 +680,15 @@ function playWinSound() {
     });
 }
 
-// 绑定重启按钮，顺便激活 AudioContext (浏览器安全策略要求)
+// 绑定重启按钮 (下一关或重玩)
 document.getElementById('restart-btn').addEventListener('click', () => {
     initAudio();
-    initGame(LEVEL_1);
+    // 如果刚才赢了，则索引递增（除非已经重置回 0 了）
+    const title = document.getElementById('game-result-title').textContent;
+    if (title === 'Victory!') {
+        gameState.currentLevelIndex++;
+    }
+    initGame();
 });
 
 // 绑定开始游戏按钮
@@ -568,7 +700,7 @@ document.getElementById('start-btn').addEventListener('click', () => {
     }
     document.getElementById('start-screen').classList.add('hidden');
     // 开始游戏
-    initGame(LEVEL_1);
+    initGame();
 });
 
 // 移除了原来的全局 mousedown 监听和自动运行逻辑

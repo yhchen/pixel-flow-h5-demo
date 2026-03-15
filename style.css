@@ -130,7 +130,7 @@ body {
     background-color: inherit;
     border: 1px solid rgba(0,0,0,0.3);
     border-radius: 2px;
-    z-index: -1;
+    z-index: 2; /* 提升层级，确保在主体之上 */
 }
 
 /* 坦克炮管旋转控制类 */
@@ -202,10 +202,10 @@ body {
     transform: translateX(-50%);
     width: 25%;
     height: 60%;
-    background-color: var(--tank-color, transparent);
+    background-color: inherit; /* 继承父级 tank-color */
     border: 1px solid rgba(0,0,0,0.3);
     border-radius: 2px;
-    z-index: -1;
+    z-index: 2; /* 确保显示 */
 }
 
 .deck-card.used {
