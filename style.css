@@ -208,12 +208,6 @@ body {
     z-index: 2; /* 确保显示 */
 }
 
-.deck-card.used {
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(0.5);
-}
-
 .deck-card:hover {
     transform: translateY(-5px);
 }

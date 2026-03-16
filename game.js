@@ -275,18 +275,14 @@ function renderDeck() {
         cardEl.style.setProperty('--tank-color', COLORS[colorKey]);
         cardEl.dataset.index = index;
         
-        if (card.used) {
-            cardEl.classList.add('used');
-        } else {
-            const ammoBadge = document.createElement('div');
-            ammoBadge.className = 'ammo-badge';
-            ammoBadge.textContent = ammo;
-            
-            cardEl.appendChild(ammoBadge);
-            
-            // 点击部署事件
-            cardEl.addEventListener('click', () => deployShooter(index));
-        }
+        const ammoBadge = document.createElement('div');
+        ammoBadge.className = 'ammo-badge';
+        ammoBadge.textContent = ammo;
+        
+        cardEl.appendChild(ammoBadge);
+        
+        // 点击部署事件
+        cardEl.addEventListener('click', () => deployShooter(index));
         
         deckEl.appendChild(cardEl);
     });
@@ -294,16 +290,20 @@ function renderDeck() {
 
 // 部署到跑道
 function deployShooter(deckIndex) {
-    const card = gameState.deck[deckIndex];
-    if (!card || card.used) return;
+    // 从数组中取出并移除
+    const [card] = gameState.deck.splice(deckIndex, 1);
+    if (!card) return;
     
     const entryIndex = 0; // 入口点默认在跑道序列的第0格 (左上角)
     
     // 检查入口点是否被占用，否则无法下牌
     const isOccupied = gameState.activeShooters.some(s => s.pathIndex === entryIndex);
-    if (isOccupied) return;
+    if (isOccupied) {
+        // 如果无法进入，放回原处
+        gameState.deck.splice(deckIndex, 0, card);
+        return;
+    }
     
-    card.used = true;
     renderDeck();
     
     const shooterEl = document.createElement('div');
@@ -327,7 +327,6 @@ function deployShooter(deckIndex) {
         ammo: card.ammo,
         pathIndex: entryIndex,
         stepsTaken: 0,
-        deckIndex: deckIndex,
         el: shooterEl,
         ammoBadgeEl: ammoBadge
     };
@@ -417,11 +416,12 @@ async function gameTick() {
             
             // 如果它已经走满了一整圈 (步数 >= 跑道总长度)，则退回底部被收回
             if (shooter.stepsTaken >= gameState.trackPath.length) {
-                const card = gameState.deck[shooter.deckIndex];
-                if (card) {
-                    card.used = false;
-                    card.ammo = shooter.ammo; // 同步剩余弹药
-                }
+                // 回收到列表中第一个空位（即末尾）
+                gameState.deck.push({ 
+                    color: shooter.color, 
+                    ammo: shooter.ammo, 
+                    used: false 
+                });
                 renderDeck();
                 needsToRemove.push(shooter);
                 continue;
