@@ -26,13 +26,14 @@ def generate_level(level_index):
         num_clusters = random.randint(1, 2)
         for _ in range(num_clusters):
             pixels_to_place = random.randint(3, 8)
-            deck.append([color, pixels_to_place])
+            actual_placed = 0
             
             # 找到一个起点
             for _ in range(20): # 尝试 20 次
                 r, c = random.randint(0, size-1), random.randint(0, size-1)
                 if map_data[r][c] == "0":
                     map_data[r][c] = color
+                    actual_placed += 1
                     # 尝试在周围扩展
                     curr_r, curr_c = r, c
                     for _ in range(pixels_to_place - 1):
@@ -44,14 +45,67 @@ def generate_level(level_index):
                         if neighbors:
                             curr_r, curr_c = random.choice(neighbors)
                             map_data[curr_r][curr_c] = color
+                            actual_placed += 1
                         else:
                             break
                     break
+            
+            if actual_placed > 0:
+                deck.append([color, actual_placed])
     
     return {
         "map": map_data,
         "deck": deck
     }
+
+def verify_and_fix_levels(levels):
+    """
+    检查并修复关卡中的子弹数量与地图块数不一致的问题
+    """
+    fixed_count = 0
+    for i, level in enumerate(levels):
+        # 统计地图上的真实颜色块数量
+        color_counts = {}
+        for row in level["map"]:
+            for cell in row:
+                if cell != "0":
+                    color_counts[cell] = color_counts.get(cell, 0) + 1
+        
+        # 统计 deck 中的子弹数量
+        deck_counts = {}
+        for color, ammo in level["deck"]:
+            deck_counts[color] = deck_counts.get(color, 0) + ammo
+        
+        # 检查是否一致
+        inconsistent = False
+        # 1. 检查 deck 中的颜色是否都在地图上，且数量一致
+        # 由于同一个颜色可能分布在多个卡片里，我们直接比较总量
+        # 如果总量不等，我们需要重新分配 deck
+        
+        if color_counts != deck_counts:
+            inconsistent = True
+        
+        if inconsistent:
+            # 简单修复逻辑：如果总量不匹配，按照实际统计结果重组 deck
+            # 保持原始颜色的相对顺序（如果可能）
+            new_deck = []
+            seen_colors = []
+            for color, _ in level["deck"]:
+                if color in color_counts and color not in seen_colors:
+                    new_deck.append([color, color_counts[color]])
+                    seen_colors.append(color)
+            
+            # 如果有地图上有但 deck 里漏掉的颜色
+            for color, count in color_counts.items():
+                if color not in seen_colors:
+                    new_deck.append([color, count])
+                    seen_colors.append(color)
+            
+            level["deck"] = new_deck
+            fixed_count += 1
+            # print(f"Level {i+1}: 修复了子弹数量不一致的问题")
+            
+    return fixed_count
 
 def format_levels(levels):
     """
@@ -215,6 +269,11 @@ def main():
     # 生成剩余关卡
     for i in range(num_existing, TOTAL_LEVELS):
         levels.append(generate_level(i))
+    
+    # 校验并修复可能的子弹不一致问题
+    fixed_count = verify_and_fix_levels(levels)
+    if fixed_count > 0:
+        print(f"校验完成：自动修复了 {fixed_count} 个关卡的子弹数量不一致问题。")
 
     # 使用自定义格式化函数生成 JS 内容
     output = "// 自动生成的关卡数据\nwindow.GAME_LEVELS = " + format_levels(levels) + ";"
