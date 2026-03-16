@@ -290,6 +290,20 @@ function renderDeck() {
 
 // 部署到跑道
 function deployShooter(deckIndex) {
+    // 限制同时上阵数量最多 5 台
+    if (gameState.activeShooters.length >= 5) {
+        playErrorSound();
+        // 视觉震动反馈
+        const cardEls = deckEl.querySelectorAll('.deck-card');
+        const targetEl = cardEls[deckIndex];
+        if (targetEl) {
+            targetEl.classList.add('shake');
+            setTimeout(() => targetEl.classList.remove('shake'), 300);
+        }
+        console.log("Max 5 tanks allowed on track.");
+        return;
+    }
+
     // 从数组中取出并移除
     const [card] = gameState.deck.splice(deckIndex, 1);
     if (!card) return;
@@ -613,6 +627,29 @@ function playShootSound() {
 
     osc.start();
     osc.stop(ctx.currentTime + 0.1);
+}
+
+// --- 错误提示音: 低沉的嘟嘟声 ---
+function playErrorSound() {
+    initAudio();
+    if (!gameState.audioCtx) return;
+
+    const ctx = gameState.audioCtx;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sawtooth'; 
+    osc.frequency.setValueAtTime(150, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.2);
+
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.2);
 }
 
 // --- 背景音乐: 坦克大战开场旋律 ---
