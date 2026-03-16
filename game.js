@@ -151,8 +151,8 @@ function initGame() {
 
     document.getElementById('game-over-panel').classList.add('hidden');
 
-    // 启动跑道游戏循环 (每90ms Tick一次)
-    gameState.tickInterval = setInterval(gameTick, 90);
+    // 启动跑道游戏循环 (每78ms Tick一次)
+    gameState.tickInterval = setInterval(gameTick, 78);
 }
 
 // 构建顺时针环形轨道坐标数列
@@ -637,7 +637,7 @@ document.getElementById('restart-btn').addEventListener('click', () => {
 // 绑定开始游戏按钮
 document.getElementById('start-btn').addEventListener('click', () => {
     initAudio();
-    
+
     if (gameState.audioCtx && !gameState.musicPlayed) {
         gameState.musicPlayed = true;
         playStartMusic();
