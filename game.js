@@ -181,9 +181,23 @@ function initGame() {
     // 更新关卡显示
     document.getElementById('level-info').textContent = `Level ${gameState.currentLevelIndex + 1} / ${LEVELS.length}`;
 
+    // --- 像素密度提升逻辑：将 map 一分为四 (2x2) ---
+    const originalMap = level.map;
+    const expandedMap = [];
+    for (let r = 0; r < originalMap.length; r++) {
+        const row1 = [];
+        const row2 = [];
+        for (let c = 0; c < originalMap[r].length; c++) {
+            const val = originalMap[r][c];
+            row1.push(val, val);
+            row2.push(val, val);
+        }
+        expandedMap.push(row1, row2);
+    }
+
     // 解析地图，加上周围一圈轨道，所以宽高各+2
-    const innerRows = level.map.length;
-    const innerCols = level.map[0].length;
+    const innerRows = expandedMap.length;
+    const innerCols = expandedMap[0].length;
     const rows = innerRows + 2;
     const cols = innerCols + 2;
     
@@ -210,12 +224,14 @@ function initGame() {
                 // 中心游戏区域
                 const innerR = r - 1;
                 const innerC = c - 1;
-                const colorKey = level.map[innerR][innerC];
+                const colorKey = expandedMap[innerR][innerC];
                 
                 if (colorKey !== '0') {
                     const pixel = document.createElement('div');
                     pixel.className = 'pixel';
                     pixel.style.backgroundColor = COLORS[colorKey];
+                    // 减小圆角以适应小尺寸
+                    pixel.style.borderRadius = '2px';
                     pixel.dataset.r = r;
                     pixel.dataset.c = c;
                     pixel.dataset.color = colorKey;
@@ -239,8 +255,12 @@ function initGame() {
     // 生成顺时针的跑道坐标序列
     buildTrackPath(rows, cols);
 
-    // 解析手牌(Deck) - 把数组转换成对象格式方便追踪 used 状态
-    gameState.deck = level.deck.map(d => ({ color: d[0], ammo: d[1], used: false }));
+    // 解析手牌(Deck) - 把数组转换成对象格式方便追踪，并将弹药量乘以 4 以适配增加的块数
+    gameState.deck = level.deck.map(d => ({ 
+        color: d[0], 
+        ammo: d[1] * 4, 
+        used: false 
+    }));
     renderDeck();
     
     document.getElementById('game-over-panel').classList.add('hidden');

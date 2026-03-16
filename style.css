@@ -5,7 +5,7 @@
     --text-color: #ecf0f1;
     --accent-color: #e74c3c;
     --border-radius: 8px;
-    --cell-size: 30px;
+    --cell-size: 15px;
 }
 
 * {
@@ -98,10 +98,9 @@ body {
     align-items: center;
 }
 
-/* 占据在格子或跑道上的坦克 (取代原先的 shooter) */
 .shooter {
-    width: 80%;
-    height: 80%;
+    width: calc(var(--cell-size) * 2);
+    height: calc(var(--cell-size) * 2);
     position: absolute;
     display: flex;
     justify-content: center;
@@ -111,11 +110,12 @@ body {
     
     /* 坦克主体样式 (类似FC坦克大战的方块像素风) */
     background-color: var(--tank-color, inherit);
+    border: 2px solid rgba(0,0,0,0.5); /* 增加轮廓感 */
     border-radius: 2px;
     box-shadow: 
-        inset 4px 0 0 rgba(0,0,0,0.3), /* 左侧履带 */
-        inset -4px 0 0 rgba(0,0,0,0.3), /* 右侧履带 */
-        0 2px 4px rgba(0,0,0,0.4);
+        inset 4px 0 0 rgba(0,0,0,0.3), /* 纵向履带效果 */
+        inset -4px 0 0 rgba(0,0,0,0.3), 
+        0 4px 8px rgba(0,0,0,0.4);
 }
 
 /* 坦克的炮管 */
@@ -148,15 +148,16 @@ body {
     background: #e74c3c;
     color: white;
     border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    font-size: 10px;
+    width: 20px; /* 略微放大适配大坦克 */
+    height: 20px;
+    font-size: 11px;
     font-weight: bold;
     display: flex;
     justify-content: center;
     align-items: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     z-index: 15;
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
 /* 可供点击的队列/卡组 */
@@ -176,8 +177,8 @@ body {
 }
 
 .deck-card {
-    min-width: 40px;
-    height: 40px;
+    min-width: 30px;
+    height: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -187,10 +188,11 @@ body {
     
     /* 坦克主体样式 */
     background-color: var(--tank-color, inherit);
+    border: 2px solid rgba(0,0,0,0.5);
     border-radius: 2px;
     box-shadow: 
-        inset 4px 0 0 rgba(0,0,0,0.3), 
-        inset -4px 0 0 rgba(0,0,0,0.3), 
+        inset 3px 0 0 rgba(0,0,0,0.3), 
+        inset -3px 0 0 rgba(0,0,0,0.3), 
         0 4px 6px rgba(0,0,0,0.3);
 }
 
